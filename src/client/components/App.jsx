@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Canvas } from '@react-three/fiber'
 
 import { io } from 'socket.io-client'
 
@@ -14,7 +15,14 @@ const App = () => {
 
   return (
     <>
-      Hi.
+    <main className='w-full aspect-video'>
+    <Canvas>
+      <mesh>
+        <boxGeometry />
+        <meshBasicMaterial color={'green'} />
+      </mesh>
+    </Canvas>
+    </main>
     </>
   )
 }
