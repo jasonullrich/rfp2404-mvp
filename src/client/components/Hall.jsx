@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { MeshToonMaterial } from 'three'
+import { RigidBody } from '@react-three/rapier'
 
 export function Hall(props) {
   const { nodes, materials } = useGLTF('/assets/hall.glb')
@@ -9,7 +10,9 @@ export function Hall(props) {
   mat.current.map = materials.Hall.map
   return (
     <group {...props} dispose={null}>
-      <mesh castShadow receiveShadow geometry={nodes.Hall.geometry} material={mat.current} />
+      <RigidBody colliders={'trimesh'} type="fixed" friction={0} >
+        <mesh castShadow receiveShadow geometry={nodes.Hall.geometry} material={mat.current} />
+      </RigidBody>
     </group>
   )
 }

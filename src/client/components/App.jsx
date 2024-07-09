@@ -1,27 +1,25 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 
 import RTC from './RTC'
-import Hall from './Hall'
-
-import { ColorManagement } from 'three'
-ColorManagement.enabled = true
+import Scene from './Scene'
 
 const App = () => {
 
+  const [gameState, setGameState] = useState('loading')
+
+  const updateState = (newState) => {
+    setGameState(newState)
+  }
+
   return (
     <>
-    <RTC>
-      <main className='w-full aspect-video'>
-        <Canvas camera={{position: [0, 3, 3]}}>
-          <ambientLight intensity={0.1} />
-          <directionalLight position={[1, 1, 1]} />
-          <Hall />
-          <mesh>
-            <boxGeometry />
-            <meshBasicMaterial color={'green'} />
-          </mesh>
-        </Canvas>
+    <RTC updateState={updateState}>
+      <main className='relative w-full aspect-video'>
+        { gameState === 'loading' ? <img src={'./assets/title.png'} className='absolute w-full h-full object-cover z-10' /> : null }
+          <Canvas >
+            <Scene />
+          </Canvas>
       </main>
     </RTC>
     </>

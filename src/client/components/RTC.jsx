@@ -6,7 +6,7 @@ const socket = io()
 
 const RTCContext = createContext()
 
-const RTC = ({children}) => {
+const RTC = ({children, updateState}) => {
   const pc = useRef(new RTCPeerConnection())
   const dataChannel = useRef(null)
 
@@ -18,6 +18,7 @@ const RTC = ({children}) => {
 
       dataChannel.current.onopen = () => {
         console.log('data channel ready')
+        updateState('ready')
       }
 
       dataChannel.current.onmessage = ({data}) => {
