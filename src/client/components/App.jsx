@@ -1,28 +1,29 @@
 import React, { useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 
-import { io } from 'socket.io-client'
+import RTC from './RTC'
+import Hall from './Hall'
 
-const socket = io()
+import { ColorManagement } from 'three'
+ColorManagement.enabled = true
 
 const App = () => {
 
-  useEffect(() => {
-    socket.on('connect', async () => {
-      console.log('connected')
-    })
-  }, [])
-
   return (
     <>
-    <main className='w-full aspect-video'>
-    <Canvas>
-      <mesh>
-        <boxGeometry />
-        <meshBasicMaterial color={'green'} />
-      </mesh>
-    </Canvas>
-    </main>
+    <RTC>
+      <main className='w-full aspect-video'>
+        <Canvas camera={{position: [0, 3, 3]}}>
+          <ambientLight intensity={0.1} />
+          <directionalLight position={[1, 1, 1]} />
+          <Hall />
+          <mesh>
+            <boxGeometry />
+            <meshBasicMaterial color={'green'} />
+          </mesh>
+        </Canvas>
+      </main>
+    </RTC>
     </>
   )
 }
