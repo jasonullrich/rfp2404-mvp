@@ -6,7 +6,6 @@ import { RigidBody } from '@react-three/rapier'
 export function Hall(props) {
   const { nodes, materials } = useGLTF('/assets/hall.glb')
   const mat = useRef(new MeshToonMaterial())
-  console.log('hi', materials.Walls)
   mat.current.map = materials.Hall.map
   return (
     <group {...props} dispose={null}>
