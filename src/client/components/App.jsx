@@ -43,7 +43,7 @@ const App = () => {
           setStartTime={setStartTime}
           setID={setID}
         >
-          <main className="relative w-full max-w-[1280px] aspect-video">
+          <main className="relative aspect-video w-full  ">
             {gameState === 'loading' ? (
               <>
                 <Loading />

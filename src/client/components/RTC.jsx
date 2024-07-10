@@ -87,6 +87,11 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
       setPlayerCount(Object.keys(players.current).length)
     })
 
+    socket.on('playerDisconnect', (id) => {
+      delete players.current[id]
+      setPlayerCount(Object.keys(players.current).length)
+    })
+
     socket.on('disconnect', () => {
       console.log('disconnected')
     })
@@ -99,9 +104,10 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
     }
 
     return () => {
+      socket.emit('disconnect')
       socket.off('connect')
       socket.off('signal')
-      socket.off('disconnect')
+      // socket.off('disconnect')
     }
   }, [])
 

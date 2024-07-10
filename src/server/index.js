@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 2
+const PLAYER_COUNT = 1
 
 const playerConnections = {}
 const playerData = {}
@@ -146,9 +146,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+      console.log('disconnect')
       delete playerData[socket.id]
       delete playerConnections[socket.id]
       delete playerNums[num]
+
+      socket.emit('playerDisconnect', socket.id)
 
       if (Object.keys(playerData).length === 0) {
         clearInterval(gameLoop)
