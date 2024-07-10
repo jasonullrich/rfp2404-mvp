@@ -7,11 +7,11 @@ import GameContext from '../context/GameContext'
 
 const socket = io()
 
-const RTC = ({children, setConnected, setID}) => {
+const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
   const pc = useRef(new RTCPeerConnection())
   const dataChannel = useRef(null)
 
-  const { players, setPlayers } = useContext(GameContext)
+  const { players, setPlayerCount } = useContext(GameContext)
 
   useEffect(() => {
     socket.on('connect', async () => {
@@ -24,11 +24,12 @@ const RTC = ({children, setConnected, setID}) => {
         setConnected(true)
       }
 
-      dataChannel.current.onmessage = ({data}) => {
-        // console.log(data)ww
+      dataChannel.current.onmessage = ({ data }) => {
+        // console.log(data)
         const message = JSON.parse(data)
+        // console.log(message)
         if (message.players) {
-          setPlayers(message.players)
+          players.current = message.players
         }
       }
 
@@ -36,7 +37,6 @@ const RTC = ({children, setConnected, setID}) => {
       console.log('created offer:', offer)
       await pc.current.setLocalDescription(offer)
       socket.emit('signal', { description: offer })
-
     })
 
     socket.on('signal', async ({ description, candidate }) => {
@@ -49,24 +49,30 @@ const RTC = ({children, setConnected, setID}) => {
       }
     })
 
-    socket.on('join', ({id, name}) => {
-      console.log('joined', {id, name})
+    socket.on('status', ({ state, data }) => {
+      console.log(state)
+      setGameState(state)
+      if (data?.startTime) {
+        setStartTime(data.startTime)
+      }
+    })
+
+    socket.on('join', (id) => {
+      console.log('joined', id)
       setID(id)
-      setPlayers(players.map(player => player.id === id ? {
-        ...player,
-        name
-      } : player))
     })
 
     socket.on('currentPlayers', (currentPlayers) => {
-      setPlayers(currentPlayers)
+      console.log('current players:', currentPlayers)
+      players.current = currentPlayers
     })
 
-    socket.on('playerJoin', async (newPlayer) => {
-      setPlayers([
-        players,
-        newPlayer
-      ])
+    socket.on('playerJoin', (newPlayer) => {
+      players.current = {
+        ...players.current,
+        ...newPlayer,
+      }
+      setPlayerCount(Object.keys(players.current).length)
     })
 
     socket.on('disconnect', () => {
@@ -88,7 +94,7 @@ const RTC = ({children, setConnected, setID}) => {
   }, [])
 
   return (
-    <RTCContext.Provider value={{socket, dataChannel: dataChannel.current}}>
+    <RTCContext.Provider value={{ socket, dataChannel: dataChannel.current }}>
       {children}
     </RTCContext.Provider>
   )

@@ -16,7 +16,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const players = {}
+const PLAYER_COUNT = 2
+
+const playerConnections = {}
+const playerData = {}
 let gameLoop
 
 io.on('connection', (socket) => {
@@ -24,16 +27,23 @@ io.on('connection', (socket) => {
 
   const pc = new RTCPeerConnection()
 
-  players[socket.id] = {
-    id: socket.id,
+  playerConnections[socket.id] = {
     pc,
-    num: Object.keys(players).length,
+    ready: false,
   }
 
-  socket.emit('currentPlayers', Object.values(players).map(p => ({id: p.id, name: p.name})))
+  playerData[socket.id] = {
+    id: socket.id,
+    num: Object.keys(playerData).length,
+    position: {},
+  }
+
+  console.log(Object.keys(playerData))
+
+  socket.emit('currentPlayers', playerData)
 
   pc.ondatachannel = ({ channel: dataChannel }) => {
-    players[socket.id].dataChannel = dataChannel
+    playerConnections[socket.id].dataChannel = dataChannel
 
     dataChannel.onopen = () => {
       console.log('data channel open')
@@ -43,7 +53,8 @@ io.on('connection', (socket) => {
       const message = JSON.parse(data)
       // console.log(message)
       if (message.position) {
-        players[message.id].position = message.position
+        playerData[message.id].position = message.position
+        playerData[message.id].rotation = message.rotation
       }
     }
   }
@@ -76,34 +87,44 @@ io.on('connection', (socket) => {
 
   socket.on('playerName', async (name) => {
     console.log(name)
-    players[socket.id].name = name
-    socket.emit('join', {id: socket.id, name})
-    socket.broadcast.emit('playerJoin', {id: socket.id, name, num: players[socket.id].num})
+    playerData[socket.id].name = name
+    playerConnections[socket.id].ready = true
+    socket.emit('join', socket.id)
+    // socket.broadcast.emit('playerJoin', playerData[socket.id])
+    io.emit('playerJoin', { [socket.id]: playerData[socket.id] })
 
-    if (!gameLoop)
-      gameLoop = setInterval(() => {
-        for (let player of Object.values(players)) {
-          if (player.dataChannel && player.dataChannel.readyState === 'open')
-          player.dataChannel.send(JSON.stringify({
-            players: Object.values(players).map(p => ({
-              id: p.id,
-              name: p.name,
-              position: p.position
-            }))
-          })
-        )
-        }
-      }, 1000 / 120)
-  })
+    if (
+      Object.keys(playerConnections).length === PLAYER_COUNT &&
+      Object.values(playerConnections).every((player) => player.ready)
+    ) {
+      io.emit('status', {
+        state: 'countdown',
+        data: { startTime: Date.now() + 3000 },
+      })
 
-  socket.on('disconnect', () => {
-    delete players[socket.id]
+      setTimeout(() => {
+        io.emit('status', { state: 'race' })
+      }, 3030)
 
-    if (Object.keys(players).length === 0) {
-      clearInterval(gameLoop)
+      if (!gameLoop) {
+        gameLoop = setInterval(() => {
+          for (let player of Object.values(playerConnections)) {
+            if (player.dataChannel && player.dataChannel.readyState === 'open')
+              player.dataChannel.send(JSON.stringify({ players: playerData }))
+          }
+        }, 1000 / 120)
+      }
     }
   })
 
+  socket.on('disconnect', () => {
+    delete playerData[socket.id]
+    delete playerConnections[socket.id]
+
+    if (Object.keys(playerData).length === 0) {
+      clearInterval(gameLoop)
+    }
+  })
 })
 
 server.listen(PORT, () => {
