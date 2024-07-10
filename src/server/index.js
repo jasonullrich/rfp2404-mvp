@@ -22,6 +22,7 @@ const PLAYER_COUNT = 1
 
 const playerConnections = {}
 const playerData = {}
+const playerNums = {}
 let gameLoop
 
 io.on('connection', (socket) => {
@@ -43,9 +44,20 @@ io.on('connection', (socket) => {
     ready: false,
   }
 
+  let num
+  for (let i = 0; i < PLAYER_COUNT; i++) {
+    if (!playerNums[i]) {
+      playerNums[i] = true
+      num = i
+      break
+    }
+  }
+
+  console.log(playerNums)
+
   playerData[socket.id] = {
     id: socket.id,
-    num: Object.keys(playerData).length,
+    num,
     position: {},
   }
 
@@ -131,6 +143,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     delete playerData[socket.id]
     delete playerConnections[socket.id]
+    delete playerNums[num]
 
     if (Object.keys(playerData).length === 0) {
       clearInterval(gameLoop)
