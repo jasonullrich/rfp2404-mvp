@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import * as esbuild from 'esbuild'
 import { tailwindPlugin } from 'esbuild-plugin-tailwindcss'
 
@@ -6,10 +7,10 @@ const context = await esbuild.context({
   bundle: true,
   sourcemap: true,
   outdir: './dist',
-  loader: {'.js': 'jsx', '.html': 'copy', '.css': 'css'},
-  plugins: [
-    tailwindPlugin({})
-  ]
+  loader: { '.js': 'jsx', '.html': 'copy', '.css': 'css' },
+  plugins: [tailwindPlugin({})],
 })
 
-await context.watch()
+if (process.env.NODE_ENV === 'development') {
+  await context.watch()
+}
