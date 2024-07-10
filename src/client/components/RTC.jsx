@@ -45,17 +45,17 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
       }
 
       const offer = await pc.current.createOffer()
-      console.log('created offer:', offer)
+      // console.log('created offer:', offer)
       await pc.current.setLocalDescription(offer)
-      socket.emit('signal', { description: offer })
+      // socket.emit('signal', { description: offer })
     })
 
     socket.on('signal', async ({ description, candidate }) => {
       if (description) {
-        console.log('recieved answer:', description)
+        // console.log('recieved answer:', description)
         await pc.current.setRemoteDescription(description)
       } else if (candidate) {
-        console.log('recieved candidate:', candidate)
+        // console.log('recieved candidate:', candidate)
         pc.current.addIceCandidate(candidate)
       }
     })
@@ -91,7 +91,7 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
     })
 
     pc.current.onicecandidate = ({ candidate }) => {
-      console.log('generated candidate:', candidate)
+      // console.log('generated candidate:', candidate)
       if (candidate) {
         socket.emit('signal', { candidate })
       }

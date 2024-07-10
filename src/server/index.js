@@ -85,17 +85,17 @@ io.on('connection', (socket) => {
 
     socket.on('signal', async ({ description, candidate }) => {
       if (description) {
-        console.log('recieved offer:', description)
+        // console.log('recieved offer:', description)
         await pc.setRemoteDescription(description)
         const answer = await pc.createAnswer()
-        console.log('created answer:', answer)
+        // console.log('created answer:', answer)
         await pc.setLocalDescription(answer)
         socket.emit('signal', { description: answer })
       } else if (candidate) {
-        console.log('recieved candidate:', candidate)
+        // console.log('recieved candidate:', candidate)
         try {
           await pc.addIceCandidate(candidate)
-          console.log('added candidate')
+          // console.log('added candidate')
         } catch (err) {
           console.log(err)
         }
@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
     })
 
     pc.onicecandidate = ({ candidate }) => {
-      console.log('generated candidate:', candidate)
+      // console.log('generated candidate:', candidate)
       if (candidate) {
         socket.emit('signal', { candidate })
       }
