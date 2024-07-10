@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react'
+import adapter from 'webrtc-adapter'
 
 import RTCContext from '../context/RTCContext'
 

@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         await pc.setLocalDescription(answer)
         socket.emit('signal', { description: answer })
       } else if (candidate) {
-        console.log('recieved candidate:', candidate)
+        // console.log('recieved candidate:', candidate)
         if (candidate.candidate === '') return
         try {
           await pc.addIceCandidate(candidate)
