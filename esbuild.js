@@ -13,4 +13,6 @@ const context = await esbuild.context({
 
 if (process.env.NODE_ENV === 'development') {
   await context.watch()
+} else {
+  process.exit()
 }
