@@ -10,7 +10,14 @@ const socket = io()
 const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
   const pc = useRef(
     new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      iceServers: [
+        {
+          urls: [
+            'stun:stun1.l.google.com:19302',
+            'stun:stun3.l.google.com:19302',
+          ],
+        },
+      ],
     })
   )
   const dataChannel = useRef(null)

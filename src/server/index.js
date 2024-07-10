@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 2
+const PLAYER_COUNT = 1
 
 const playerConnections = {}
 const playerData = {}
@@ -28,7 +28,14 @@ io.on('connection', (socket) => {
   console.log('connected')
 
   const pc = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    iceServers: [
+      {
+        urls: [
+          'stun:stun1.l.google.com:19302',
+          'stun:stun3.l.google.com:19302',
+        ],
+      },
+    ],
   })
 
   playerConnections[socket.id] = {
