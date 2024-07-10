@@ -92,9 +92,9 @@ const PlayerCharacter = ({ player }) => {
       friction={0}
       type={controlled ? 'dynamic' : 'kinematicPosition'}
     >
-      {gameState === 'playing' ? (
+      {gameState === 'race' ? (
         <Html center position={[0, 1.1, 0]}>
-          <span className="text-white text-xl font-bold">
+          <span className="text-white text-xl font-bold whitespace-nowrap">
             {players.current[player].name}
           </span>
         </Html>
