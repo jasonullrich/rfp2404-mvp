@@ -8,7 +8,11 @@ import GameContext from '../context/GameContext'
 const socket = io()
 
 const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
-  const pc = useRef(new RTCPeerConnection())
+  const pc = useRef(
+    new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    })
+  )
   const dataChannel = useRef(null)
 
   const { players, setPlayerCount } = useContext(GameContext)

@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -25,7 +27,9 @@ let gameLoop
 io.on('connection', (socket) => {
   console.log('connected')
 
-  const pc = new RTCPeerConnection()
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  })
 
   playerConnections[socket.id] = {
     pc,
