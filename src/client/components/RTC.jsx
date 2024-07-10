@@ -47,7 +47,7 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
       const offer = await pc.current.createOffer()
       // console.log('created offer:', offer)
       await pc.current.setLocalDescription(offer)
-      // socket.emit('signal', { description: offer })
+      socket.emit('signal', { description: offer })
     })
 
     socket.on('signal', async ({ description, candidate }) => {
