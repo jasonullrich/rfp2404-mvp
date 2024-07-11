@@ -29,6 +29,7 @@ let gameLoop
 const reset = () => {
   console.log('reset')
   clearInterval(gameLoop)
+  gameLoop = null
   playerServerData = {}
   playerClientData = {}
   playerNums = {}
@@ -213,7 +214,6 @@ io.on('connection', (socket) => {
       io.emit('currentPlayers', playerClientData)
 
       if (Object.keys(playerClientData).length === 0) {
-        clearInterval(gameLoop)
         reset()
       }
     })
