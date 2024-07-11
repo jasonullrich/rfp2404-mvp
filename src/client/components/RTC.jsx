@@ -8,7 +8,14 @@ import GameContext from '../context/GameContext'
 
 const socket = io()
 
-const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
+const RTC = ({
+  children,
+  setConnected,
+  setID,
+  setGameState,
+  setStartTime,
+  setLap,
+}) => {
   const pc = useRef(
     new RTCPeerConnection({
       iceServers: [
@@ -69,6 +76,11 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
       }
     })
 
+    socket.on('lap', (lap) => {
+      console.log('lap:', lap)
+      setLap(lap)
+    })
+
     socket.on('join', (id) => {
       console.log('joined', id)
       setID(id)
@@ -104,7 +116,6 @@ const RTC = ({ children, setConnected, setID, setGameState, setStartTime }) => {
     }
 
     return () => {
-      socket.emit('disconnect')
       socket.off('connect')
       socket.off('signal')
       // socket.off('disconnect')

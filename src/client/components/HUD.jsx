@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react'
 import GameContext from '../context/GameContext'
 
-const Countdown = () => {
-  const [display, setDisplay] = useState(null)
+const HUD = () => {
+  const [countdown, setCountdown] = useState(null)
 
-  const { startTime } = useContext(GameContext)
+  const { gameState, startTime, lap } = useContext(GameContext)
 
   let interval
 
@@ -12,11 +12,11 @@ const Countdown = () => {
     const getDate = () => {
       const seconds = Math.ceil((new Date(startTime) - new Date()) / 1000)
       if (seconds > 0) {
-        setDisplay(seconds)
+        setCountdown(seconds)
       } else {
-        setDisplay('Go!')
+        setCountdown('Go!')
         setTimeout(() => {
-          setDisplay(null)
+          setCountdown(null)
           clearInterval(interval)
         }, 1000)
       }
@@ -32,10 +32,20 @@ const Countdown = () => {
   return (
     <>
       <div className="absolute w-full h-full flex justify-center items-center z-10">
-        <span className="text-white text-[20vw]">{display}</span>
+        {countdown ? (
+          <span className="text-white text-[20vw]">{countdown}</span>
+        ) : null}
+        {gameState === 'finished' ? (
+          <span className="text-white text-[20vw]">Finished!</span>
+        ) : null}
+        {gameState === 'race' ? (
+          <span className="absolute text-white text-[10vw] right-8 bottom-8">
+            {lap}/3
+          </span>
+        ) : null}
       </div>
     </>
   )
 }
 
-export default Countdown
+export default HUD

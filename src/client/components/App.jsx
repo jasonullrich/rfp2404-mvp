@@ -6,7 +6,7 @@ import Scene from './Scene'
 import Loading from './Loading'
 
 import GameContext from '../context/GameContext'
-import Countdown from './Countdown'
+import HUD from './HUD'
 
 const App = () => {
   // const [gameState, setGameState] = useState('loading')
@@ -15,6 +15,7 @@ const App = () => {
   const [playerCount, setPlayerCount] = useState(0)
   const [gameState, setGameState] = useState('loading')
   const [startTime, setStartTime] = useState(null)
+  const [lap, setLap] = useState(1)
 
   const players = useRef({})
   const setPlayers = (newPlayers) => {
@@ -35,6 +36,7 @@ const App = () => {
           playerCount,
           setPlayerCount,
           startTime,
+          lap,
         }}
       >
         <RTC
@@ -42,14 +44,17 @@ const App = () => {
           setGameState={setGameState}
           setStartTime={setStartTime}
           setID={setID}
+          setLap={setLap}
         >
           <main className="relative aspect-video w-full  ">
-            {gameState === 'loading' ? (
+            {gameState === 'loading' || gameState === 'results' ? (
               <>
                 <Loading />
               </>
-            ) : gameState === 'countdown' || gameState === 'race' ? (
-              <Countdown />
+            ) : gameState === 'countdown' ||
+              gameState === 'race' ||
+              gameState === 'finished' ? (
+              <HUD />
             ) : null}
             <Canvas>
               <Scene />

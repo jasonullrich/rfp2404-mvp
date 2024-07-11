@@ -19,10 +19,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 app.use(express.static(path.join(__dirname, '../../dist')))
 
 const PLAYER_COUNT = 1
+const LAPS = 3
 
-const playerConnections = {}
-const playerData = {}
-const playerNums = {}
+let playerServerData = {}
+let playerClientData = {}
+let playerNums = {}
 let gameLoop
 
 io.on('connection', (socket) => {
@@ -40,9 +41,13 @@ io.on('connection', (socket) => {
       ],
     })
 
-    playerConnections[socket.id] = {
+    playerServerData[socket.id] = {
       pc,
       ready: false,
+      progress: {
+        half: false,
+        finish: false,
+      },
     }
 
     let num
@@ -56,18 +61,19 @@ io.on('connection', (socket) => {
 
     console.log(playerNums)
 
-    playerData[socket.id] = {
+    playerClientData[socket.id] = {
       id: socket.id,
       num,
       position: {},
+      lap: 1,
     }
 
-    console.log(Object.keys(playerData))
+    console.log(Object.keys(playerClientData))
 
-    socket.emit('currentPlayers', playerData)
+    socket.emit('currentPlayers', playerClientData)
 
     pc.ondatachannel = ({ channel: dataChannel }) => {
-      playerConnections[socket.id].dataChannel = dataChannel
+      playerServerData[socket.id].dataChannel = dataChannel
 
       dataChannel.onopen = () => {
         console.log('data channel open')
@@ -77,8 +83,8 @@ io.on('connection', (socket) => {
         const message = JSON.parse(data)
         // console.log(message)
         if (message.position) {
-          playerData[message.id].position = message.position
-          playerData[message.id].rotation = message.rotation
+          playerClientData[message.id].position = message.position
+          playerClientData[message.id].rotation = message.rotation
         }
       }
     }
@@ -112,15 +118,15 @@ io.on('connection', (socket) => {
 
     socket.on('playerName', async (name) => {
       console.log(name)
-      playerData[socket.id].name = name
-      playerConnections[socket.id].ready = true
+      playerClientData[socket.id].name = name
+      playerServerData[socket.id].ready = true
       socket.emit('join', socket.id)
       // socket.broadcast.emit('playerJoin', playerData[socket.id])
-      io.emit('playerJoin', { [socket.id]: playerData[socket.id] })
+      io.emit('playerJoin', { [socket.id]: playerClientData[socket.id] })
 
       if (
-        Object.keys(playerConnections).length === PLAYER_COUNT &&
-        Object.values(playerConnections).every((player) => player.ready)
+        Object.keys(playerServerData).length === PLAYER_COUNT &&
+        Object.values(playerServerData).every((player) => player.ready)
       ) {
         io.emit('status', {
           state: 'countdown',
@@ -133,27 +139,61 @@ io.on('connection', (socket) => {
 
         if (!gameLoop) {
           gameLoop = setInterval(() => {
-            for (let player of Object.values(playerConnections)) {
+            for (let player of Object.values(playerServerData)) {
               if (
                 player.dataChannel &&
                 player.dataChannel.readyState === 'open'
               )
-                player.dataChannel.send(JSON.stringify({ players: playerData }))
+                player.dataChannel.send(
+                  JSON.stringify({ players: playerClientData })
+                )
             }
           }, 1000 / 60)
         }
       }
     })
 
+    socket.on('progress', (progress) => {
+      if (progress === 'half') {
+        if (playerServerData[socket.id].progress.half) return
+        playerServerData[socket.id].progress.half = true
+      } else if (progress === 'finish') {
+        if (playerServerData[socket.id].progress.finish) return
+        if (playerServerData[socket.id].progress.half) {
+          playerServerData[socket.id].progress.finish = true
+          playerServerData[socket.id].progress = {
+            half: false,
+            finish: false,
+          }
+          playerClientData[socket.id].lap++
+          socket.emit('lap', playerClientData[socket.id].lap)
+          if (playerClientData[socket.id].lap > LAPS) {
+            io.emit('status', { state: 'finished' })
+          }
+        }
+      }
+      if (
+        Object.values(playerClientData).every((player) => player.lap > LAPS)
+      ) {
+        setTimeout(() => {
+          io.emit('status', { state: 'results' })
+          clearInterval(gameLoop)
+          playerServerData = {}
+          playerClientData = {}
+          playerNums = {}
+        }, 1000)
+      }
+    })
+
     socket.on('disconnect', () => {
       console.log('disconnect')
-      delete playerData[socket.id]
-      delete playerConnections[socket.id]
+      delete playerClientData[socket.id]
+      delete playerServerData[socket.id]
       delete playerNums[num]
 
       socket.emit('playerDisconnect', socket.id)
 
-      if (Object.keys(playerData).length === 0) {
+      if (Object.keys(playerClientData).length === 0) {
         clearInterval(gameLoop)
       }
     })
