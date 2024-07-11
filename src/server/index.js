@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 1
+const PLAYER_COUNT = 2
 const LAPS = 3
 
 let playerServerData = {}
@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
       dataChannel.onmessage = ({ data }) => {
         const message = JSON.parse(data)
         // console.log(message)
-        if (message.position) {
+        if (message.position && playerClientData[message.id]) {
           playerClientData[message.id].position = message.position
           playerClientData[message.id].rotation = message.rotation
         }
@@ -144,9 +144,13 @@ io.on('connection', (socket) => {
                 player.dataChannel &&
                 player.dataChannel.readyState === 'open'
               )
-                player.dataChannel.send(
-                  JSON.stringify({ players: playerClientData })
-                )
+                try {
+                  player.dataChannel.send(
+                    JSON.stringify({ players: playerClientData })
+                  )
+                } catch (err) {
+                  continue
+                }
             }
           }, 1000 / 60)
         }
