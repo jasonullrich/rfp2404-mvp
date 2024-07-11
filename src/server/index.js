@@ -18,13 +18,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 2
+const PLAYER_COUNT = 1
 const LAPS = 3
 
 let playerServerData = {}
 let playerClientData = {}
 let playerNums = {}
 let gameLoop
+
+const reset = () => {
+  clearInterval(gameLoop)
+  playerServerData = {}
+  playerClientData = {}
+  playerNums = {}
+  io.disconnectSockets()
+}
 
 io.on('connection', (socket) => {
   console.log('connected')
@@ -181,10 +189,7 @@ io.on('connection', (socket) => {
       ) {
         setTimeout(() => {
           io.emit('status', { state: 'results' })
-          clearInterval(gameLoop)
-          playerServerData = {}
-          playerClientData = {}
-          playerNums = {}
+          reset()
         }, 1000)
       }
     })
@@ -205,6 +210,7 @@ io.on('connection', (socket) => {
 
       if (Object.keys(playerClientData).length === 0) {
         clearInterval(gameLoop)
+        reset()
       }
     })
   }

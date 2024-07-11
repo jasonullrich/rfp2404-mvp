@@ -28,7 +28,7 @@ const PlayerCharacter = ({ player }) => {
   const goalVel = useRef(new Vector3())
 
   useFrame((state, delta) => {
-    if (gameState === 'race') {
+    if (gameState === 'race' || gameState === 'finished') {
       // console.log(players.current)
       if (controlled) {
         dataChannel.send(
