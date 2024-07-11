@@ -9,18 +9,14 @@ import GameContext from '../context/GameContext'
 import HUD from './HUD'
 
 const App = () => {
-  // const [gameState, setGameState] = useState('loading')
-  const [connected, setConnected] = useState(false)
   const [id, setID] = useState(null)
+  const [players, setPlayers] = useState({})
   const [playerCount, setPlayerCount] = useState(0)
   const [gameState, setGameState] = useState('loading')
   const [startTime, setStartTime] = useState(null)
   const [lap, setLap] = useState(1)
 
-  const players = useRef({})
-  const setPlayers = (newPlayers) => {
-    players.current = newPlayers
-  }
+  const playerData = useRef({})
 
   // const gameState = (connected && id) ? 'playing' : 'loading'
   console.log(gameState)
@@ -33,6 +29,7 @@ const App = () => {
           id,
           players,
           setPlayers,
+          playerData,
           playerCount,
           setPlayerCount,
           startTime,
@@ -40,13 +37,12 @@ const App = () => {
         }}
       >
         <RTC
-          setConnected={setConnected}
           setGameState={setGameState}
           setStartTime={setStartTime}
           setID={setID}
           setLap={setLap}
         >
-          <main className="relative aspect-video w-full  ">
+          <main className="relative aspect-video w-full max-w-[1280px]">
             {gameState === 'loading' || gameState === 'results' ? (
               <>
                 <Loading />

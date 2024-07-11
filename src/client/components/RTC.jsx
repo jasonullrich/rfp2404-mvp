@@ -30,7 +30,7 @@ const RTC = ({
   )
   const dataChannel = useRef(null)
 
-  const { players, setPlayerCount } = useContext(GameContext)
+  const { playerData, setPlayerCount, setPlayers } = useContext(GameContext)
 
   useEffect(() => {
     socket.on('connect', async () => {
@@ -40,7 +40,6 @@ const RTC = ({
 
       dataChannel.current.onopen = () => {
         console.log('data channel ready')
-        setConnected(true)
       }
 
       dataChannel.current.onmessage = ({ data }) => {
@@ -48,7 +47,7 @@ const RTC = ({
         const message = JSON.parse(data)
         // console.log(message)
         if (message.players) {
-          players.current = message.players
+          playerData.current = message.players
         }
       }
 
@@ -88,13 +87,14 @@ const RTC = ({
 
     socket.on('currentPlayers', (currentPlayers) => {
       console.log('current players:', currentPlayers)
-      players.current = currentPlayers
-      setPlayerCount(Object.keys(players.current).length)
+      // playerData.current = currentPlayers
+      setPlayers(currentPlayers)
+      setPlayerCount(Object.keys(playerData.current).length)
     })
 
     socket.on('playerDisconnect', (id) => {
-      delete players.current[id]
-      setPlayerCount(Object.keys(players.current).length)
+      delete playerData.current[id]
+      setPlayerCount(Object.keys(playerData.current).length)
     })
 
     socket.on('disconnect', () => {

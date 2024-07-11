@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 1
+const PLAYER_COUNT = 2
 const LAPS = 3
 
 let playerServerData = {}
@@ -27,6 +27,7 @@ let playerNums = {}
 let gameLoop
 
 const reset = () => {
+  console.log('reset')
   clearInterval(gameLoop)
   playerServerData = {}
   playerClientData = {}
@@ -36,6 +37,8 @@ const reset = () => {
 
 io.on('connection', (socket) => {
   console.log('connected')
+
+  socket.emit('join', socket.id)
 
   if (Object.keys(playerNums).length < PLAYER_COUNT) {
     const pc = new RTCPeerConnection({
@@ -128,7 +131,7 @@ io.on('connection', (socket) => {
       console.log(name)
       playerClientData[socket.id].name = name
       playerServerData[socket.id].ready = true
-      socket.emit('join', socket.id)
+      // socket.emit('join', socket.id)
       // socket.broadcast.emit('playerJoin', playerData[socket.id])
       io.emit('currentPlayers', playerClientData)
 
@@ -207,6 +210,7 @@ io.on('connection', (socket) => {
       )
 
       io.emit('playerDisconnect', socket.id)
+      io.emit('currentPlayers', playerClientData)
 
       if (Object.keys(playerClientData).length === 0) {
         clearInterval(gameLoop)

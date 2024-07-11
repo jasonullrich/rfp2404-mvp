@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 
-import { KeyboardControls } from '@react-three/drei'
+import { KeyboardControls, OrbitControls, useProgress } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 
 import Hall from './Hall'
@@ -9,7 +9,6 @@ import PlayerCharacter from './PlayerCharacter'
 import GameContext from '../context/GameContext'
 
 import { ColorManagement } from 'three'
-import { useFrame } from '@react-three/fiber'
 ColorManagement.enabled = true
 
 const keyMap = [
@@ -20,29 +19,28 @@ const keyMap = [
 ]
 
 const Scene = () => {
-  const { players, playerCount } = useContext(GameContext)
-  console.log(players.current)
+  const { players, playerData, playerCount } = useContext(GameContext)
+  console.log(playerData.current)
   console.log('player count:', playerCount)
 
+  const { active: loading } = useProgress()
+
   return (
-    <KeyboardControls map={keyMap}>
-      <Physics>
-        {/* <ambientLight intensity={0.1} /> */}
-        <directionalLight position={[1, 1, -1]} intensity={3} />
-        <Hall />
-        {Array.from({ length: playerCount }).map((v, i) => (
-          <PlayerCharacter
-            key={Object.keys(players.current)[i]}
-            player={Object.keys(players.current)[i]}
-          />
-        ))}
-        {/* <Player active={false}/> */}
-        {/* <mesh>
-          <boxGeometry />
-          <meshBasicMaterial color={'green'} />
-          </mesh> */}
-      </Physics>
-    </KeyboardControls>
+    <>
+      <KeyboardControls map={keyMap}>
+        {/* <OrbitControls /> */}
+        <Physics>
+          {/* <ambientLight intensity={0.1} /> */}
+          <directionalLight position={[1, 1, -1]} intensity={3} />
+          <Hall />
+          {!loading
+            ? Object.keys(players).map((player) => (
+                <PlayerCharacter key={player} player={player} />
+              ))
+            : null}
+        </Physics>
+      </KeyboardControls>
+    </>
   )
 }
 

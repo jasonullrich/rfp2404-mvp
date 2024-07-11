@@ -31,7 +31,7 @@ const HUD = () => {
 
   return (
     <>
-      <div className="absolute w-full h-full flex justify-center items-center z-10">
+      <div className="absolute w-full h-full flex justify-center items-center z-10 pointer-events-none">
         {countdown ? (
           <span className="text-white text-[20vw]">{countdown}</span>
         ) : null}

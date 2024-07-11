@@ -1,5 +1,5 @@
-import React, { useContext, useRef } from 'react'
-import { CapsuleCollider, RigidBody } from '@react-three/rapier'
+import React, { useContext, useEffect, useRef } from 'react'
+import { BallCollider, CapsuleCollider, RigidBody } from '@react-three/rapier'
 import PlayerMesh from './PlayerMesh'
 import { Html, useKeyboardControls } from '@react-three/drei'
 import { Vector3 } from 'three'
@@ -11,13 +11,20 @@ import RTCContext from '../context/RTCContext'
 const movementSpeed = 10
 
 const PlayerCharacter = ({ player }) => {
-  const { gameState, id, players } = useContext(GameContext)
-  console.log(players.current)
+  const { gameState, id, players, playerData } = useContext(GameContext)
+  console.log(playerData.current)
 
   const controlled = player === id
   console.log('controlled:', controlled)
 
   const { dataChannel } = useContext(RTCContext)
+
+  const initialPosition = { x: 0, y: 0.75, z: -players[player].num * 2.3 }
+  console.log(initialPosition)
+
+  useEffect(() => {
+    rbRef.current.setTranslation(initialPosition)
+  }, [])
 
   const [, get] = useKeyboardControls()
   const rbRef = useRef()
@@ -70,36 +77,44 @@ const PlayerCharacter = ({ player }) => {
         rbRef.current.setAngvel(angVel.current, true)
       } else {
         if (
-          players.current[player]?.position &&
-          players.current[player]?.rotation
+          playerData.current[player]?.position &&
+          playerData.current[player]?.rotation
         ) {
-          rbRef.current.setTranslation(players.current[player].position)
-          rbRef.current.setRotation(players.current[player].rotation)
+          rbRef.current.setTranslation(playerData.current[player].position)
+          rbRef.current.setRotation(playerData.current[player].rotation)
         }
       }
     }
   })
 
-  console.log(player)
-
+  console.log('rendering:', player, 'at', [0, 0.5, -players[player].num * 2.3])
+  // console.log(player, 'sleeping', rbRef.current?.isSleeping())
+  // console.log(player, 'dynamic', rbRef.current?.isDynamic())
+  // console.log(player, 'enabled', rbRef.current?.isEnabled())
+  // console.log(player, 'fixed', rbRef.current?.isFixed())
+  // console.log(player, 'kinematic', rbRef.current?.isKinematic())
+  // console.log(player, 'moving', rbRef.current?.isMoving())
+  // console.log(player, 'valid', rbRef.current?.isValid())
   return (
     <RigidBody
       ref={rbRef}
-      position={[0, 0.5, -players.current[player].num * 2.3]}
+      position={[initialPosition.x, initialPosition.y, initialPosition.z]}
       mass={1}
       colliders={false}
       enabledRotations={[false, true, false]}
       friction={0}
       type={controlled ? 'dynamic' : 'kinematicPosition'}
+      // type={'fixed'}
+      canSleep={false}
     >
       {gameState === 'race' ? (
         <Html center position={[0, 1.1, 0]}>
           <span className="text-white text-xl font-bold whitespace-nowrap">
-            {players.current[player].name}
+            {players[player].name}
           </span>
         </Html>
       ) : null}
-      <CapsuleCollider args={[0.125, 0.75]} />
+      <BallCollider args={[0.75]} />
       <PlayerMesh player={player} ref={gRef} position={[0, -0.75, 0]} />
     </RigidBody>
   )
