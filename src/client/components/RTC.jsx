@@ -89,13 +89,6 @@ const RTC = ({
     socket.on('currentPlayers', (currentPlayers) => {
       console.log('current players:', currentPlayers)
       players.current = currentPlayers
-    })
-
-    socket.on('playerJoin', (newPlayer) => {
-      players.current = {
-        ...players.current,
-        ...newPlayer,
-      }
       setPlayerCount(Object.keys(players.current).length)
     })
 

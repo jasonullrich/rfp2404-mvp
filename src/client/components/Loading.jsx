@@ -1,11 +1,17 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import RTCContext from '../context/RTCContext'
 
-const Loading = ({ setPlayerName }) => {
+const Loading = () => {
   const [clicked, setClicked] = useState(false)
   const [waiting, setWaiting] = useState(false)
 
   const { socket } = useContext(RTCContext)
+
+  const inputRef = useRef()
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus()
+  }, [clicked])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -22,10 +28,20 @@ const Loading = ({ setPlayerName }) => {
         />
         <div className="absolute left-1/2 -translate-x-1/2 bottom-[10%] p-4 bg-purple-300 text-3xl">
           {!clicked ? (
-            <button onClick={() => setClicked(true)}>JOIN</button>
+            <button
+              onClick={() => {
+                setClicked(true)
+              }}
+            >
+              JOIN
+            </button>
           ) : !waiting ? (
-            <form onSubmit={handleSubmit}>
-              <input name="name" placeholder="ENTER YOUR NAME" />
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col items-center"
+            >
+              <input ref={inputRef} name="name" placeholder="ENTER YOUR NAME" />
+              <button>READY</button>
             </form>
           ) : (
             <span>Waiting for others.</span>

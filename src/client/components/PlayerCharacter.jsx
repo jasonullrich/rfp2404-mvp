@@ -85,7 +85,7 @@ const PlayerCharacter = ({ player }) => {
   return (
     <RigidBody
       ref={rbRef}
-      position={[0, 0.5, -players.current[player].num * 2]}
+      position={[0, 0.5, -players.current[player].num * 2.3]}
       mass={1}
       colliders={false}
       enabledRotations={[false, true, false]}

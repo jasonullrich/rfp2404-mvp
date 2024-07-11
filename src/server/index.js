@@ -122,7 +122,7 @@ io.on('connection', (socket) => {
       playerServerData[socket.id].ready = true
       socket.emit('join', socket.id)
       // socket.broadcast.emit('playerJoin', playerData[socket.id])
-      io.emit('playerJoin', { [socket.id]: playerClientData[socket.id] })
+      io.emit('currentPlayers', playerClientData)
 
       if (
         Object.keys(playerServerData).length === PLAYER_COUNT &&
@@ -195,7 +195,13 @@ io.on('connection', (socket) => {
       delete playerServerData[socket.id]
       delete playerNums[num]
 
-      socket.emit('playerDisconnect', socket.id)
+      console.log(
+        Object.keys(playerClientData).length,
+        Object.keys(playerNums).length,
+        Object.keys(playerServerData).length
+      )
+
+      io.emit('playerDisconnect', socket.id)
 
       if (Object.keys(playerClientData).length === 0) {
         clearInterval(gameLoop)
