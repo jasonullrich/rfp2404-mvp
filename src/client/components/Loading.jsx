@@ -21,7 +21,7 @@ const Loading = () => {
 
   return (
     <>
-      <div className="absolute w-full h-full z-10">
+      <div className="absolute w-full h-full z-10 left-0 top-0">
         <img
           src={'./assets/title.png'}
           className="w-full h-full object-cover"

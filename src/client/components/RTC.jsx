@@ -30,7 +30,8 @@ const RTC = ({
   )
   const dataChannel = useRef(null)
 
-  const { playerData, setPlayerCount, setPlayers } = useContext(GameContext)
+  const { playerData, setPlayerCount, setPlayers, setRaceID } =
+    useContext(GameContext)
 
   useEffect(() => {
     socket.on('connect', async () => {
@@ -68,10 +69,14 @@ const RTC = ({
     })
 
     socket.on('status', ({ state, data }) => {
-      console.log(state)
+      console.log(state, data)
       setGameState(state)
       if (data?.startTime) {
         setStartTime(data.startTime)
+      }
+      if (data?.raceID) {
+        console.log('race ID:', data.raceID)
+        setRaceID(data.raceID)
       }
     })
 

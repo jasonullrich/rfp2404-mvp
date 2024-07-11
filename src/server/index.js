@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import wrtc from 'wrtc'
+import sql from '../db/index.js'
+import { v4 as uuid } from 'uuid'
 
 const app = express()
 const server = createServer(app)
@@ -18,13 +20,36 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 app.use(express.static(path.join(__dirname, '../../dist')))
 
-const PLAYER_COUNT = 2
-const LAPS = 3
+app.get('/results', async (req, res) => {
+  const results = await sql`
+    select time, player
+    from times
+    order by time
+    limit 10
+  `
+  console.log(results)
+  res.json(results)
+})
+app.get('/results/:id', async (req, res) => {
+  const id = req.params.id
+  const results = await sql`
+    select time, player
+    from times
+    where race_id = ${id}
+  `
+  console.log(results)
+  res.json(results)
+})
+
+const PLAYER_COUNT = 1
+const LAPS = 1
 
 let playerServerData = {}
 let playerClientData = {}
 let playerNums = {}
 let gameLoop
+let startTime
+let raceID = uuid()
 
 const reset = () => {
   console.log('reset')
@@ -34,6 +59,7 @@ const reset = () => {
   playerClientData = {}
   playerNums = {}
   io.disconnectSockets()
+  raceID = uuid()
 }
 
 io.on('connection', (socket) => {
@@ -140,13 +166,14 @@ io.on('connection', (socket) => {
         Object.keys(playerServerData).length === PLAYER_COUNT &&
         Object.values(playerServerData).every((player) => player.ready)
       ) {
+        startTime = Date.now() + 3000
         io.emit('status', {
           state: 'countdown',
-          data: { startTime: Date.now() + 3000 },
+          data: { startTime },
         })
 
         setTimeout(() => {
-          io.emit('status', { state: 'race' })
+          io.emit('status', { state: 'race', data: { raceID } })
         }, 3030)
 
         if (!gameLoop) {
@@ -169,7 +196,7 @@ io.on('connection', (socket) => {
       }
     })
 
-    socket.on('progress', (progress) => {
+    socket.on('progress', async (progress) => {
       if (progress === 'half') {
         if (playerServerData[socket.id].progress.half) return
         playerServerData[socket.id].progress.half = true
@@ -185,6 +212,12 @@ io.on('connection', (socket) => {
           socket.emit('lap', playerClientData[socket.id].lap)
           if (playerClientData[socket.id].lap > LAPS) {
             socket.emit('status', { state: 'finished' })
+            await sql`
+              insert into times (time, race_id, player)
+              values (${Date.now() - startTime}, ${raceID}, ${
+              playerClientData[socket.id].name
+            })
+            `
           }
         }
       }
@@ -194,7 +227,7 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           io.emit('status', { state: 'results' })
           reset()
-        }, 1000)
+        }, 3000)
       }
     })
 

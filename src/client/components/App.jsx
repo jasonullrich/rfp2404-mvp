@@ -7,9 +7,13 @@ import Loading from './Loading'
 
 import GameContext from '../context/GameContext'
 import HUD from './HUD'
+import Results from './Results'
+import HighScores from './HighScores'
+import Footer from './Footer'
 
 const App = () => {
   const [id, setID] = useState(null)
+  const [raceID, setRaceID] = useState(null)
   const [players, setPlayers] = useState({})
   const [playerCount, setPlayerCount] = useState(0)
   const [gameState, setGameState] = useState('loading')
@@ -34,6 +38,8 @@ const App = () => {
           setPlayerCount,
           startTime,
           lap,
+          raceID,
+          setRaceID,
         }}
       >
         <RTC
@@ -42,8 +48,11 @@ const App = () => {
           setID={setID}
           setLap={setLap}
         >
-          <main className="relative aspect-video w-full max-w-[1280px]">
-            {gameState === 'loading' || gameState === 'results' ? (
+          <main className="relative aspect-video w-full max-w-[1280px] m-4">
+            <Canvas>
+              <Scene />
+            </Canvas>
+            {gameState === 'loading' ? (
               <>
                 <Loading />
               </>
@@ -51,11 +60,12 @@ const App = () => {
               gameState === 'race' ||
               gameState === 'finished' ? (
               <HUD />
+            ) : gameState === 'results' ? (
+              <Results />
             ) : null}
-            <Canvas>
-              <Scene />
-            </Canvas>
           </main>
+          <HighScores />
+          <Footer />
         </RTC>
       </GameContext.Provider>
     </>
