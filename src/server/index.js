@@ -172,7 +172,7 @@ io.on('connection', (socket) => {
           playerClientData[socket.id].lap++
           socket.emit('lap', playerClientData[socket.id].lap)
           if (playerClientData[socket.id].lap > LAPS) {
-            io.emit('status', { state: 'finished' })
+            socket.emit('status', { state: 'finished' })
           }
         }
       }
