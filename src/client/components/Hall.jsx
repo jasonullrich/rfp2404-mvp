@@ -40,6 +40,12 @@ export function Hall(props) {
       >
         <mesh geometry={nodes.Half.geometry} material={invis} />
       </RigidBody>
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes.FinishLine.geometry}
+        material={materials.Finish}
+      />
     </group>
   )
 }
