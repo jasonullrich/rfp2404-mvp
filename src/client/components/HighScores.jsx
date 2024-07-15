@@ -6,9 +6,14 @@ const HighScores = () => {
   const [results, setResults] = useState([])
 
   const getResults = async () => {
+    const dummyData = Array(10)
+      .fill(0)
+      .map(() => ({ player: '??????', time: null }))
     const res = await fetch(`/results`)
     const data = await res.json()
-    setResults(data)
+    if (data) {
+      setResults([...data, ...dummyData].slice(0, 10))
+    }
   }
 
   useEffect(() => {
@@ -25,7 +30,9 @@ const HighScores = () => {
               return (
                 <tr key={i}>
                   <td className="px-8">{result.player}</td>
-                  <td className="px-8">{format(result.time)}</td>
+                  <td className="px-8">
+                    {result.time ? format(result.time) : '--:--:---'}
+                  </td>
                 </tr>
               )
             })}

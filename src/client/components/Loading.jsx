@@ -26,22 +26,28 @@ const Loading = () => {
           src={'./assets/title.png'}
           className="w-full h-full object-cover"
         />
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-[10%] p-4 bg-purple-300 text-3xl">
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-[10%]  bg-purple-400 text-3xl rounded-2xl text-white">
           {!clicked ? (
             <button
               onClick={() => {
                 setClicked(true)
               }}
+              className="px-8 py-4 hover:underline"
             >
               JOIN
             </button>
           ) : !waiting ? (
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col items-center"
+              className="flex flex-col gap-2 items-center px-8 py-4"
             >
-              <input ref={inputRef} name="name" placeholder="ENTER YOUR NAME" />
-              <button>READY</button>
+              <input
+                ref={inputRef}
+                name="name"
+                placeholder="ENTER YOUR NAME"
+                className="px-4 py-2 text-black"
+              />
+              <button className="hover:underline">READY</button>
             </form>
           ) : (
             <span>Waiting for others.</span>
