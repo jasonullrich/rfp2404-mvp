@@ -42,7 +42,7 @@ app.get('/results/:id', async (req, res) => {
 })
 
 const PLAYER_COUNT = 1
-const LAPS = 1
+const LAPS = 6
 
 let playerServerData = {}
 let playerClientData = {}
